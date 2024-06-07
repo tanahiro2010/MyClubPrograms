@@ -13,10 +13,11 @@
 #define MB_IN1 PB8
 #define MB_IN2 PB9
 
-const bool mode = 1; //動作モード: true,計測モード: false 1=true, 0=false
-const int maxPower = 3100;
-const int minPower = 2000;
-const int moterPower = 240;
+const bool mode = true; //動作モード: true,計測モード: false 1=true, 0=false
+const int maxPower = 2500;
+const int minPower = 800;
+const int moterPower = 255;
+const int tarn = 150;
 
 void setup() {
   // put your setup code here, to run once:
@@ -210,20 +211,20 @@ void B_RT(int MPower){
 //Reaction
 void reactionR(){
   //Serial.println("Right now");
-  B_LT(moterPower - 10);
+  B_LT(moterPower);
   digitalWrite(MB_IN1, LOW);
   digitalWrite(MB_IN2, HIGH);
   
   
-  analogWrite(MB_PWM, 255);
+  analogWrite(MB_PWM, 255 - tarn);
 }
   
   
 void reactionL(){
-  B_RT(moterPower - 10);
+  B_RT(moterPower);
   digitalWrite(MB_IN1, HIGH);
   digitalWrite(MB_IN2, LOW);
 
 
-  analogWrite(MB_PWM, 255);  
+  analogWrite(MB_PWM, 255 - tarn);  
 }
