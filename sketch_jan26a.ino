@@ -1,19 +1,19 @@
 #define R PA3
 #define L PA4
 
-#define ML_PWM PA8    // モータ左_PWM
-#define ML_IN1 PA15    // モータ左_IN1
-#define ML_IN2 PB3    // モータ左_IN2
+#define ML_PWM PA8      // モータ左_PWM
+#define ML_IN1 PA15     // モータ左_IN1
+#define ML_IN2 PB3      // モータ左_IN2
 
-#define MR_PWM PA9   // モータ右_PWM
-#define MR_IN1 PB4   // モータ右_IN1
-#define MR_IN2 PB5   // モータ右_IN2
+#define MR_PWM PA9      // モータ右_PWM
+#define MR_IN1 PB4      // モータ右_IN1
+#define MR_IN2 PB5      // モータ右_IN2
 
-#define MB_PWM PA10
-#define MB_IN1 PB8
-#define MB_IN2 PB9
+#define MB_PWM PA10     // モータ後_PWM
+#define MB_IN1 PB8      // モータ後_IN1
+#define MB_IN2 PB9      // モータ後_IN2
 
-const bool mode = true; //動作モード: true,計測モード: false 1=true, 0=false
+const bool mode = true; // 動作モード: true,計測モード: false 1=true, 0=false
 const int maxPower = 2500;
 const int minPower = 800;
 const int moterPower = 255;
@@ -21,8 +21,13 @@ const int tarn = 150;
 
 void setup() {
   // put your setup code here, to run once:
-  Serial.begin(9600);
-  //Serial.println("Start");
+  
+  if (!mode){
+    Serial.begin(9600);
+    Serial.println("Begin.");  
+  }
+  
+  // Serial.println("Start");
   
   pinMode(ML_PWM, OUTPUT);
   pinMode(MR_PWM, OUTPUT);
@@ -52,8 +57,8 @@ void action()
 {
   while (true)
   {
-    int temp_l = analogRead(L);
-    int temp_r = analogRead(R);
+    const int temp_l = analogRead(L);
+    const int temp_r = analogRead(R);
     if (temp_l >= maxPower && temp_r <= minPower){
       reactionR();
    
@@ -65,7 +70,7 @@ void action()
     if (temp_l <= minPower && temp_r <= minPower ||
           temp_l >= maxPower && temp_r >= maxPower){
       B_ST();
-      B_FW(moterPower, 0);
+      B_FW(moterPower, 10);
   
     }
   }
@@ -176,7 +181,7 @@ void B_BK(int MPower,int HV){  //B_BK(モーター出力,補正値)　補正値�
 // ロボット動作（左回転）
 //--------------------------------------------
 
-void B_LT(int MPower){
+void B_LT(int MPower_R, int MPower_L){
   
   digitalWrite(ML_IN1,HIGH);
   digitalWrite(ML_IN2,LOW);
@@ -184,8 +189,8 @@ void B_LT(int MPower){
   digitalWrite(MR_IN1,HIGH);
   digitalWrite(MR_IN2,LOW);
 
-  analogWrite(ML_PWM,MPower);
-  analogWrite(MR_PWM,MPower);
+  analogWrite(ML_PWM,MPower_L);
+  analogWrite(MR_PWM,MPower_R);
   
 }
 
@@ -194,7 +199,7 @@ void B_LT(int MPower){
 // ロボット動作（右回転）
 //--------------------------------------------
 
-void B_RT(int MPower){
+void B_RT(int MPower_R, int MPower_L){
 
   digitalWrite(ML_IN1,LOW);
   digitalWrite(ML_IN2,HIGH);
@@ -202,29 +207,29 @@ void B_RT(int MPower){
   digitalWrite(MR_IN1,LOW);
   digitalWrite(MR_IN2,HIGH);
 
-  analogWrite(ML_PWM,MPower);
-  analogWrite(MR_PWM,MPower);
+  analogWrite(ML_PWM, MPower_L);
+  analogWrite(MR_PWM, MPower_R);
 
 }
 
 
-//Reaction
+// Reaction
 void reactionR(){
-  //Serial.println("Right now");
-  B_LT(moterPower);
+  // Serial.println("Right now");
+  B_LT(moterPower - 10, moterPower - tarn);
   digitalWrite(MB_IN1, LOW);
   digitalWrite(MB_IN2, HIGH);
   
   
-  analogWrite(MB_PWM, 255 - tarn);
+  analogWrite(MB_PWM, 255);
 }
   
   
 void reactionL(){
-  B_RT(moterPower);
+  B_RT(moterPower - tarn, moterPower - 10);
   digitalWrite(MB_IN1, HIGH);
   digitalWrite(MB_IN2, LOW);
 
 
-  analogWrite(MB_PWM, 255 - tarn);  
+  analogWrite(MB_PWM, 255);  
 }
